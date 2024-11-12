@@ -37,4 +37,40 @@
             app:layout_constraintBottom_toBottomOf="parent"
             android:paddingBottom="@dimen/x_sm"/>
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/homeControlWrapper"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:background="?attr/colorPrimary">
+            <TextView
+                android:id="@+id/icAudio"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:drawableStartCompat="@drawable/ic_audiotrack"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:paddingEnd="@dimen/sm"
+                tools:ignore="RtlSymmetry" />
+            <TextView
+                android:id="@+id/homeSongNameView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/icAudio"
+                android:text="Bài bát chơi hiện tại"
+                app:layout_constraintWidth_percent="0.6"
+                android:ellipsize="marquee"
+                android:singleLine="true"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:textColor="@color/white"
+                app:layout_consHorizontalBias="0"
+                android:textStyle="bold"
+                />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
     </androidx.constraintlayout.widget.ConstraintLayout>

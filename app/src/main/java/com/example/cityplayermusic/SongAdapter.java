@@ -13,9 +13,14 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.MediaMetadata;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SongAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -23,13 +28,15 @@ public class SongAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     Context context;
     List<Song> songs;
+    ExoPlayer player;
 
     // Constructor
 
 
-    public SongAdapter(Context context, List<Song> songs) {
+    public SongAdapter(Context context, List<Song> songs, ExoPlayer player) {
         this.context = context;
         this.songs = songs;
+        this.player = player;
     }
 
     @NonNull
@@ -64,8 +71,42 @@ public class SongAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
         }
 
-        // ấn vào item
-        viewHoler.itemView.setOnClickListener(view -> Toast.makeText(context, song.getTitle(), Toast.LENGTH_SHORT).show()   );
+        //chơi nhạc khi ấn vào item
+        viewHoler.itemView.setOnClickListener(view -> {
+            // playing the song
+            if(!player.isPlaying()){
+                player.setMediaItems(getMediaItems(), position,0);
+            }
+            else {
+                player.pause();
+                player.seekTo(position,0);
+            }
+            //prepare and play
+            player.prepare();
+            player.play();
+            Toast.makeText(context, song.getTitle(), Toast.LENGTH_SHORT).show();
+        }  );
+    }
+
+    private List<MediaItem> getMediaItems() {
+        // define a list of media items
+        List<MediaItem>mediaItems = new ArrayList<>();
+        for(Song song : songs){
+            MediaItem mediaItem = new MediaItem.Builder()
+                    .setUri(song.getUri())
+                    .setMediaMetadata(getMetadata(song))
+                    .build();
+            // add the media item to media items list
+            mediaItems.add(mediaItem);
+        }
+        return mediaItems;
+    }
+
+    private MediaMetadata getMetadata(Song song) {
+        return new MediaMetadata.Builder()
+                .setTitle(song.getTitle())
+                .setArtworkUri(song.getArtwork())
+                .build();
     }
 
 

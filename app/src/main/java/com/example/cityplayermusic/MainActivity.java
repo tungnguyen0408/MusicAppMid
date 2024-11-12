@@ -28,6 +28,8 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.exoplayer2.ExoPlayer;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -42,6 +44,9 @@ public class MainActivity extends AppCompatActivity {
     List<Song> allSongs = new ArrayList<>();
     ActivityResultLauncher<String> storagePermissionLauncher;
     final String permission = Manifest.permission.READ_EXTERNAL_STORAGE;
+
+    // Hôm nay
+    ExoPlayer player;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +72,20 @@ public class MainActivity extends AppCompatActivity {
         // khởi động cấp phép bộ nhớ để tạo
 
         storagePermissionLauncher.launch(permission);
+
+        player = new ExoPlayer.Builder(this).build();
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // release the player
+        if(player.isPlaying()){
+            player.stop();
+        }
+        player.release();
+    }
+
     private void userResponses() {
         if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED){
             fetchSongs();
@@ -117,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
         };
 
         // sắp xếp
-        String sortOrder = MediaStore.Audio.Media.DATE_ADDED + " DESC";
+        String sortOrder = MediaStore.Audio.Media.DATE_ADDED;
         // lấy ra danh sách
         try (Cursor cursor = getContentResolver().query(mediaStorageUri, projection, null, null, sortOrder)){
         int idColumn = Objects.requireNonNull(cursor).getColumnIndexOrThrow(MediaStore.Audio.Media._ID);
@@ -138,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
 
             Uri uri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id);
             // uri bộ sưu tập artwork
-            Uri albumArtWorkUri = ContentUris.withAppendedId(Uri.parse("content://media/external/audi/albumart"), albumId);
+            Uri albumArtWorkUri = ContentUris.withAppendedId(Uri.parse("drawable/default_bg.jpg"), albumId);
 
             // bỏ đuôi .mp3 từ tên của bài hát
 
@@ -174,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(layoutManager);
 
         // chuyển đổi các bai hát
-        songAdapter  = new SongAdapter(this, songs);
+        songAdapter  = new SongAdapter(this, songs, player);
          // tạo bộ chuyển đổi đến recycleview
 
         //recyclerView.setAdapter(songAdapter);
