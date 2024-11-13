@@ -2,6 +2,8 @@ package com.example.cityplayermusic;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +13,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.SearchView;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.exoplayer2.ExoPlayer;
@@ -22,6 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import android.Manifest;
 
 public class SongAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     // Members
@@ -29,14 +35,16 @@ public class SongAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     Context context;
     List<Song> songs;
     ExoPlayer player;
+    ConstraintLayout playerView;
 
     // Constructor
 
 
-    public SongAdapter(Context context, List<Song> songs, ExoPlayer player) {
+    public SongAdapter(Context context, List<Song> songs, ExoPlayer player, ConstraintLayout playerView) {
         this.context = context;
         this.songs = songs;
         this.player = player;
+        this.playerView = playerView;
     }
 
     @NonNull
@@ -50,7 +58,7 @@ public class SongAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-// bài hát hiện tại và màn hình hiện tại
+        // bài hát hiện tại và màn hình hiện tại
         Song song = songs.get(position);
         SongViewHolder viewHoler = (SongViewHolder) holder;
 
@@ -73,6 +81,18 @@ public class SongAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         //chơi nhạc khi ấn vào item
         viewHoler.itemView.setOnClickListener(view -> {
+            // start the player service
+            context.startService(new Intent(context.getApplicationContext(), PlayerService.class));
+
+            //is song played from search view?
+            SearchView searchView = ((MainActivity) context).searchView;
+            if(searchView != null){
+                searchView.clearFocus();
+            }
+
+            // show player view
+            playerView.setVisibility(View.VISIBLE);
+
             // playing the song
             if(!player.isPlaying()){
                 player.setMediaItems(getMediaItems(), position,0);
@@ -85,7 +105,14 @@ public class SongAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             player.prepare();
             player.play();
             Toast.makeText(context, song.getTitle(), Toast.LENGTH_SHORT).show();
-        }  );
+
+
+            //check if the record audio permission is granted, hence request it
+            if(ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED){
+                // request the record audio perm
+                ((MainActivity) context).recordAudioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO);
+            }
+        });
     }
 
     private List<MediaItem> getMediaItems() {

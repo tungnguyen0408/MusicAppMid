@@ -44,6 +44,8 @@ dependencies {
     // recycleview animators
     implementation("jp.wasabeef:recyclerview-animators:4.0.2")
 
+    implementation("androidx.constraintlayout:constraintlayout:2.1.0")
+
     implementation("com.google.android.exoplayer:exoplayer:2.17.0")
 
     implementation("de.hdodenhof:circleimageview:3.1.0")
